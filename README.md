@@ -30,3 +30,9 @@ Deux agents IA qui débattent entre eux dans un scénario [Make](https://www.mak
 ## Limites
 
 Les modèles peuvent inventer des articles de loi ou des décisions. Les prompts leur demandent de ne citer que ce dont ils sont certains, mais toute référence juridique doit être vérifiée (Légifrance) avant usage. Ce projet est un exercice et ne remplace pas un conseil juridique.
+
+## Auvers-sur-Oise en 3D
+
+`auvers-3d/index.html` est une maquette 3D (Three.js) du village d'Auvers-sur-Oise. On y trouve l'église Notre-Dame-de-l'Assomption, le château d'Auvers et ses terrasses, la rue Victor-Hugo (avec une promenade à hauteur d'homme), la grand-rue, l'Auberge Ravoux, la mairie, le cimetière, le plateau et l'Oise. Il suffit d'ouvrir le fichier dans un navigateur connecté à Internet. Three.js est chargé depuis jsDelivr.
+
+Le plan est une reconstitution approximative et ne suit pas le cadastre.
