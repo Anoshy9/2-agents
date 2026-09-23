@@ -1,0 +1,204 @@
+<title>Auvers-sur-Oise 3D</title>
+<meta name="description" content="Reconstitution 3D d'Auvers-sur-Oise : l'église Notre-Dame-de-l'Assomption, le château d'Auvers et la rue Victor-Hugo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=IBM+Plex+Mono:wght@500&family=Libre+Franklin:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f1ead9;
+    --muted: #bdb6a3;
+    --panel: rgba(17, 25, 23, 0.74);
+    --panel-solid: #111917;
+    --line: rgba(241, 234, 217, 0.16);
+    --accent: #e2b441;
+    --accent-ink: #1c1a10;
+    --ground: #0e1513;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 14px/1.45 "Libre Franklin", system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  #scene { position: fixed; inset: 0; }
+  #scene canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  .panel {
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    backdrop-filter: blur(10px) saturate(1.15);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .brand {
+    position: fixed;
+    left: 16px;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    width: min(340px, calc(100vw - 32px));
+    box-sizing: border-box;
+    padding: 14px 16px 12px;
+  }
+  .brand h1 {
+    font-family: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 1;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .mono {
+    font: 500 11px/1.35 "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .lede { margin: 10px 0 0; font-size: 13px; color: var(--ink); max-width: 36ch; }
+  .hint { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+  .dock {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .dock > * { pointer-events: auto; }
+  .views {
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    overflow-x: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    scrollbar-width: none;
+  }
+  .views button, .chip {
+    font: 500 13px/1 "Libre Franklin", system-ui, sans-serif;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 9px 12px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .views button:hover { background: rgba(241, 234, 217, 0.08); }
+  .views button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .views button.walk { border-color: rgba(226, 180, 65, 0.55); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .time {
+    display: grid;
+    grid-template-columns: auto minmax(120px, 1fr) 4.2em auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    width: min(420px, 100%);
+    box-sizing: border-box;
+  }
+  .time label { font-size: 12px; color: var(--muted); }
+  .time output { font: 500 13px "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; text-align: right; }
+  .time input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .chk { display: flex; gap: 6px; align-items: center; cursor: pointer; white-space: nowrap; }
+  .chk input { accent-color: var(--accent); margin: 0; }
+  #tags { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  [hidden] { display: none !important; }
+  .tag {
+    position: absolute;
+    left: 0; top: 0;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--ink);
+    cursor: pointer;
+    will-change: transform;
+  }
+  .tag .box {
+    background: rgba(17, 25, 23, 0.8);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 9px 6px;
+    text-align: left;
+    max-width: 230px;
+  }
+  .tag .t { display: block; font: 600 13px/1.2 "Libre Franklin", system-ui, sans-serif; white-space: nowrap; }
+  .tag .s { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .tag .stem { width: 1px; height: 22px; background: rgba(241, 234, 217, 0.7); }
+  .tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px rgba(17, 25, 23, 0.7); }
+  .tag:hover .box { border-color: var(--accent); }
+  .tag.far .s { display: none; }
+  #loading {
+    position: fixed; inset: 0;
+    display: grid; place-items: center;
+    background: var(--ground);
+    z-index: 5;
+    padding-inline: 16px;
+  }
+  #loading .panel { padding: 22px 26px; text-align: center; }
+  #loading .l1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-style: italic; font-size: 26px; margin: 0 0 8px;
+  }
+  @media (max-width: 640px) {
+    .brand { padding: 10px 12px; }
+    .brand h1 { font-size: 26px; }
+    .lede { font-size: 12px; }
+    .hint { display: none; }
+    .time { grid-template-columns: auto 1fr 4.2em; }
+    .time .chk { grid-column: 1 / -1; }
+    .tag .s { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div id="scene" role="img" aria-label="Vue 3D d'Auvers-sur-Oise"></div>
+<div id="tags"></div>
+
+<header class="brand panel">
+  <h1>Auvers-sur-Oise</h1>
+  <p class="mono">Val-d'Oise · 49°04′ N · 2°10′ E</p>
+  <p class="lede">La rue Victor-Hugo, de la rue de Zundert à la maison du docteur Gachet, avec l'église, le château, l'Oise et le plateau des blés.</p>
+  <p class="hint">Glisser pour tourner · molette ou pincement pour zoomer · clic droit ou deux doigts pour se déplacer</p>
+</header>
+
+<div class="dock">
+  <nav class="views panel" aria-label="Points de vue">
+    <button type="button" data-view="vh" aria-pressed="true">Rue Victor-Hugo</button>
+    <button type="button" data-view="walk" class="walk" aria-pressed="false">Marcher rue Victor-Hugo</button>
+    <button type="button" data-view="gachet" aria-pressed="false">Maison du Dr Gachet</button>
+    <button type="button" data-view="ensemble" aria-pressed="false">Vue d'ensemble</button>
+    <button type="button" data-view="eglise" aria-pressed="false">L'église</button>
+    <button type="button" data-view="chateau" aria-pressed="false">Le château</button>
+    <button type="button" data-view="oise" aria-pressed="false">Bords de l'Oise</button>
+    <button type="button" data-view="plateau" aria-pressed="false">Le plateau</button>
+  </nav>
+  <div class="time panel">
+    <label for="hour">Heure</label>
+    <input id="hour" type="range" min="7" max="20.5" step="0.25" value="17.5">
+    <output id="hourOut" for="hour">17 h 30</output>
+    <label class="chk"><input id="showTags" type="checkbox" checked> Noms des lieux</label>
+  </div>
+</div>
+
+<div id="loading"><div class="panel"><p class="l1">Construction du village…</p><p id="step" class="mono">Chargement</p></div></div>
+
+<script>
+  // Affiche toute erreur de chargement au lieu de rester bloqué sur « Chargement ».
+  window.addEventListener('error', function (e) { var el = document.getElementById('step'); if (el) el.textContent = 'Erreur : ' + (e.message || 'chargement impossible'); });
+  window.addEventListener('unhandledrejection', function (e) { var el = document.getElementById('step'); if (el) el.textContent = 'Erreur : ' + (e.reason && e.reason.message ? e.reason.message : e.reason); });
+</script>
+<script>
+/*__BUNDLE__*/
+</script>
