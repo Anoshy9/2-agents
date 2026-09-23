@@ -33,6 +33,6 @@ Les modèles peuvent inventer des articles de loi ou des décisions. Les prompts
 
 ## Auvers-sur-Oise en 3D
 
-`auvers-3d/index.html` est une maquette 3D (Three.js) du village d'Auvers-sur-Oise. On y trouve l'église Notre-Dame-de-l'Assomption, le château d'Auvers et ses terrasses, la rue Victor-Hugo (avec une promenade à hauteur d'homme), la grand-rue, l'Auberge Ravoux, la mairie, le cimetière, le plateau et l'Oise. Il suffit d'ouvrir le fichier dans un navigateur connecté à Internet. Three.js est chargé depuis jsDelivr.
+`auvers-3d/index.html` est une maquette 3D (Three.js) du village d'Auvers-sur-Oise. Elle est centrée sur la rue Victor-Hugo, de la rue de Zundert (avec son passage piéton) jusqu'à la rue du Docteur-Gachet et la maison du docteur Gachet au n° 78. On y voit les trottoirs, les réverbères, les numéros de rue, le restaurant du n° 24, les jardinets en terrasse et les portails. Une promenade à hauteur d'homme est proposée. On y trouve aussi l'église Notre-Dame-de-l'Assomption, le château d'Auvers et ses terrasses, la grand-rue, l'Auberge Ravoux, la mairie, le cimetière, le plateau et l'Oise. Il suffit d'ouvrir le fichier dans un navigateur connecté à Internet. Three.js est chargé depuis jsDelivr.
 
 Le plan est une reconstitution approximative et ne suit pas le cadastre.
